@@ -4,26 +4,38 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MissoesService {
 
     private MissaoRepository missaoRepository;
+    private MissaoMapper missaoMapper;
+
+    public MissoesService(MissaoRepository missaoRepository, MissaoMapper missaoMapper) {
+        this.missaoRepository = missaoRepository;
+        this.missaoMapper = missaoMapper;
+    }
 
     //Listar missao
-    public List<MissaoModel> listarMissao() {
-        return missaoRepository.findAll();
+    public List<MissaoDTO> listarMissao() {
+        List<MissaoModel> missao = missaoRepository.findAll();
+        return missao.stream()
+                .map(missaoMapper::map)
+                .toList();
     }
 
     //Listar missao por id
-    public MissaoModel listarMissaoPorId(Long id) {
+    public MissaoDTO listarMissaoPorId(Long id) {
         Optional<MissaoModel> listarMissaoPorId = missaoRepository.findById(id);
-        return listarMissaoPorId.orElse(null);
+        return listarMissaoPorId.map(missaoMapper::map).orElse(null);
     }
 
     //Criar missao
-    public MissaoModel criarMissao(MissaoModel missao) {
-        return missaoRepository.save(missao);
+    public MissaoDTO criarMissao(MissaoDTO missaoDTO) {
+        MissaoModel missao = missaoMapper.map(missaoDTO);
+        missao = missaoRepository.save(missao);
+        return missaoMapper.map(missao);
     }
 
     //Deletar Missao
